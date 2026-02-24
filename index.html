@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>动物消消乐</title>
+    <title>可爱动物消消乐</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', cursive, Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -36,38 +36,62 @@
         }
 
         .game-title {
-            color: #4a5568;
-            font-size: 2em;
-            margin-bottom: 10px;
+            font-size: 28px;
+            color: #4a4a4a;
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .game-info {
-            display: flex;
-            justify-content: space-between;
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
 
-        .info-item {
-            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 100%);
-            padding: 10px 15px;
+        .stat-item {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             border-radius: 15px;
-            color: #4a5568;
-            font-weight: bold;
-            font-size: 1.1em;
-            margin: 5px;
-            min-width: 120px;
+            padding: 10px;
             text-align: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 18px;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .level-progress {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
         .game-board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            grid-gap: 3px;
-            background: #4a5568;
-            border-radius: 15px;
-            padding: 10px;
+            gap: 3px;
+            background: #333;
+            border-radius: 10px;
+            padding: 5px;
             margin-bottom: 20px;
         }
 
@@ -79,47 +103,65 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            font-size: 1.8em;
-            transition: all 0.3s ease;
-            user-select: none;
+            transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
         }
 
         .cell:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .cell.selected {
-            background: #ffd700;
-            transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            background: #ffeb3b;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
         }
 
-        .cell.matched {
-            animation: matchAnimation 0.6s ease-in-out;
-        }
-
-        @keyframes matchAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); background: #ff6b6b; }
-            100% { transform: scale(0); opacity: 0; }
+        .cell.matching {
+            animation: pulse 0.5s ease-in-out;
         }
 
         .cell.falling {
-            animation: fallAnimation 0.5s ease-in-out;
+            animation: fall 0.5s ease-in;
         }
 
-        @keyframes fallAnimation {
-            0% { transform: translateY(-50px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+        .animal {
+            font-size: 24px;
+            transition: all 0.3s ease;
         }
 
-        .controls {
+        .cell:hover .animal {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .special-block {
+            position: relative;
+        }
+
+        .special-block::after {
+            content: '✨';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
+        .bomb-block::after {
+            content: '💥';
+        }
+
+        .rainbow-block {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            background-size: 300% 300%;
+            animation: rainbow 2s ease-in-out infinite;
+        }
+
+        .game-controls {
             display: flex;
+            gap: 10px;
             justify-content: center;
-            gap: 15px;
             flex-wrap: wrap;
         }
 
@@ -127,7 +169,7 @@
             padding: 12px 24px;
             border: none;
             border-radius: 25px;
-            font-size: 1em;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -136,20 +178,20 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
-        .btn-secondary {
-            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .modal {
@@ -174,58 +216,122 @@
             text-align: center;
             max-width: 400px;
             width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         .modal-title {
-            font-size: 2em;
+            font-size: 24px;
             margin-bottom: 15px;
-            color: #4a5568;
+            color: #333;
         }
 
-        .modal-message {
-            font-size: 1.2em;
+        .modal-text {
+            font-size: 16px;
             margin-bottom: 20px;
             color: #666;
+            line-height: 1.5;
         }
 
-        .win-modal .modal-title {
-            color: #48bb78;
+        .combo-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 193, 7, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            transform: scale(0);
+            transition: all 0.3s ease;
         }
 
-        .lose-modal .modal-title {
-            color: #f56565;
+        .combo-indicator.show {
+            transform: scale(1);
         }
 
-        .progress-bar {
-            width: 100%;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background-color: #ffeb3b; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .power-ups {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .power-up {
+            background: linear-gradient(135deg, #8360c3, #2ebf91);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .power-up:hover {
+            transform: scale(1.1);
+        }
+
+        .power-up.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .power-up-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
             height: 20px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #48bb78 0%, #38a169 100%);
-            transition: width 0.3s ease;
-            border-radius: 10px;
-        }
-
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
             .game-title {
-                font-size: 1.5em;
+                font-size: 24px;
             }
             
-            .cell {
-                font-size: 1.4em;
+            .animal {
+                font-size: 20px;
             }
             
-            .info-item {
-                font-size: 1em;
-                padding: 8px 12px;
-                min-width: 100px;
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
             }
         }
     </style>
@@ -233,392 +339,664 @@
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1 class="game-title">🎮 动物消消乐</h1>
+            <h1 class="game-title">🐾 动物消消乐 🐾</h1>
         </div>
-        
-        <div class="game-info">
-            <div class="info-item">
-                🏆 得分: <span id="score">0</span>
+
+        <div class="game-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="score">0</span>
+                <span class="stat-label">得分</span>
             </div>
-            <div class="info-item">
-                🎯 目标: <span id="target">1000</span>
+            <div class="stat-item">
+                <span class="stat-value" id="level">1</span>
+                <span class="stat-label">关卡</span>
             </div>
-            <div class="info-item">
-                💎 步数: <span id="moves">30</span>
+            <div class="stat-item">
+                <span class="stat-value" id="moves">30</span>
+                <span class="stat-label">步数</span>
             </div>
         </div>
 
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+        <div class="level-progress">
+            <div class="progress-bar" id="progressBar"></div>
         </div>
-        
+
+        <div class="power-ups">
+            <button class="power-up" id="bombPowerUp" title="炸弹 - 消除周围3x3区域">
+                💣
+                <span class="power-up-count" id="bombCount">3</span>
+            </button>
+            <button class="power-up" id="rainbowPowerUp" title="彩虹球 - 消除所有同色方块">
+                🌈
+                <span class="power-up-count" id="rainbowCount">2</span>
+            </button>
+            <button class="power-up" id="shufflePowerUp" title="重新排列">
+                🔀
+                <span class="power-up-count" id="shuffleCount">2</span>
+            </button>
+        </div>
+
         <div class="game-board" id="gameBoard"></div>
-        
-        <div class="controls">
-            <button class="btn btn-primary" onclick="newGame()">🆕 新游戏</button>
-            <button class="btn btn-secondary" onclick="resetGame()">🔄 重置</button>
+
+        <div class="combo-indicator" id="comboIndicator">
+            COMBO x<span id="comboCount">0</span>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-primary" onclick="startGame()">开始游戏</button>
+            <button class="btn btn-success" onclick="pauseGame()">暂停</button>
+            <button class="btn btn-danger" onclick="resetGame()">重置</button>
         </div>
     </div>
 
     <!-- 游戏结束模态框 -->
     <div class="modal" id="gameModal">
         <div class="modal-content">
-            <h2 class="modal-title" id="modalTitle"></h2>
-            <p class="modal-message" id="modalMessage"></p>
-            <button class="btn btn-primary" onclick="closeModal()">继续游戏</button>
-            <button class="btn btn-secondary" onclick="newGame(); closeModal();">开始新游戏</button>
+            <h2 class="modal-title" id="modalTitle">游戏结束</h2>
+            <p class="modal-text" id="modalText">恭喜通关！</p>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="nextLevel()">下一关</button>
+                <button class="btn btn-success" onclick="restartGame()">重新开始</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 游戏配置
-        const BOARD_SIZE = 8;
-        const ANIMALS = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼'];
-        const INITIAL_MOVES = 30;
-        const TARGET_SCORE = 1000;
-        const POINTS_PER_MATCH = 10;
-
-        // 游戏状态
-        let board = [];
-        let selectedCell = null;
-        let score = 0;
-        let moves = INITIAL_MOVES;
-        let target = TARGET_SCORE;
-        let isAnimating = false;
-
-        // 初始化游戏
-        function initGame() {
-            score = 0;
-            moves = INITIAL_MOVES;
-            target = TARGET_SCORE;
-            selectedCell = null;
-            isAnimating = false;
-            
-            updateUI();
-            createBoard();
-            generateInitialBoard();
-            renderBoard();
-        }
-
-        // 创建游戏板DOM
-        function createBoard() {
-            const gameBoard = document.getElementById('gameBoard');
-            gameBoard.innerHTML = '';
-            
-            for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.dataset.index = i;
-                cell.addEventListener('click', handleCellClick);
-                gameBoard.appendChild(cell);
-            }
-        }
-
-        // 生成初始游戏板（确保没有初始匹配）
-        function generateInitialBoard() {
-            board = [];
-            
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                board[row] = [];
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    let animal;
-                    do {
-                        animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-                    } while (
-                        (col >= 2 && board[row][col-1] === animal && board[row][col-2] === animal) ||
-                        (row >= 2 && board[row-1] && board[row-1][col] === animal && board[row-2][col] === animal)
-                    );
-                    board[row][col] = animal;
-                }
-            }
-        }
-
-        // 渲染游戏板
-        function renderBoard() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach((cell, index) => {
-                const row = Math.floor(index / BOARD_SIZE);
-                const col = index % BOARD_SIZE;
-                cell.textContent = board[row][col];
-                cell.classList.remove('selected', 'matched', 'falling');
-            });
-        }
-
-        // 处理格子点击
-        function handleCellClick(event) {
-            if (isAnimating || moves <= 0) return;
-
-            const index = parseInt(event.target.dataset.index);
-            const row = Math.floor(index / BOARD_SIZE);
-            const col = index % BOARD_SIZE;
-
-            if (!selectedCell) {
-                // 选择第一个格子
-                selectedCell = {row, col, element: event.target};
-                event.target.classList.add('selected');
-            } else {
-                // 选择第二个格子
-                if (selectedCell.row === row && selectedCell.col === col) {
-                    // 取消选择
-                    selectedCell.element.classList.remove('selected');
-                    selectedCell = null;
-                    return;
-                }
-
-                // 检查是否相邻
-                const rowDiff = Math.abs(selectedCell.row - row);
-                const colDiff = Math.abs(selectedCell.col - col);
+        class AnimalMatch3Game {
+            constructor() {
+                this.board = [];
+                this.selectedCell = null;
+                this.score = 0;
+                this.level = 1;
+                this.moves = 30;
+                this.targetScore = 1000;
+                this.combo = 0;
+                this.gameActive = true;
+                this.isPaused = false;
+                this.animals = ['🐱', '🐶', '🐰', '🐼', '🐨', '🦊', '🐸', '🐷'];
+                this.powerUps = {
+                    bomb: 3,
+                    rainbow: 2,
+                    shuffle: 2
+                };
+                this.activePowerUp = null;
                 
-                if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
-                    // 尝试交换
-                    attemptSwap(selectedCell.row, selectedCell.col, row, col);
-                }
-
-                // 清除选择
-                selectedCell.element.classList.remove('selected');
-                selectedCell = null;
-            }
-        }
-
-        // 尝试交换两个格子
-        function attemptSwap(row1, col1, row2, col2) {
-            // 临时交换
-            const temp = board[row1][col1];
-            board[row1][col1] = board[row2][col2];
-            board[row2][col2] = temp;
-
-            // 检查是否有匹配
-            const matches1 = findMatches(row1, col1);
-            const matches2 = findMatches(row2, col2);
-
-            if (matches1.length > 0 || matches2.length > 0) {
-                // 有效交换
-                moves--;
-                updateUI();
-                renderBoard();
-                setTimeout(() => processMatches(), 300);
-            } else {
-                // 无效交换，还原
-                board[row1][col1] = board[row2][col2];
-                board[row2][col2] = temp;
-            }
-        }
-
-        // 查找匹配
-        function findMatches(row, col) {
-            const animal = board[row][col];
-            const matches = new Set();
-            matches.add(`${row},${col}`);
-
-            // 检查水平匹配
-            let left = col - 1;
-            while (left >= 0 && board[row][left] === animal) {
-                matches.add(`${row},${left}`);
-                left--;
-            }
-            
-            let right = col + 1;
-            while (right < BOARD_SIZE && board[row][right] === animal) {
-                matches.add(`${row},${right}`);
-                right++;
+                this.initGame();
+                this.bindEvents();
             }
 
-            // 如果水平匹配少于3个，清除水平匹配
-            const horizontalMatches = Array.from(matches).filter(pos => {
-                const [r, c] = pos.split(',').map(Number);
-                return r === row;
-            });
-            
-            if (horizontalMatches.length < 3) {
-                horizontalMatches.forEach(pos => matches.delete(pos));
-                matches.add(`${row},${col}`);
+            initGame() {
+                this.createBoard();
+                this.updateDisplay();
+                this.removeInitialMatches();
             }
 
-            // 检查垂直匹配
-            let up = row - 1;
-            while (up >= 0 && board[up][col] === animal) {
-                matches.add(`${up},${col}`);
-                up--;
-            }
-            
-            let down = row + 1;
-            while (down < BOARD_SIZE && board[down][col] === animal) {
-                matches.add(`${down},${col}`);
-                down++;
-            }
+            createBoard() {
+                const boardElement = document.getElementById('gameBoard');
+                boardElement.innerHTML = '';
+                this.board = [];
 
-            // 如果垂直匹配少于3个，清除垂直匹配
-            const verticalMatches = Array.from(matches).filter(pos => {
-                const [r, c] = pos.split(',').map(Number);
-                return c === col;
-            });
-            
-            if (verticalMatches.length < 3) {
-                verticalMatches.forEach(pos => matches.delete(pos));
-            }
+                for (let row = 0; row < 8; row++) {
+                    this.board[row] = [];
+                    for (let col = 0; col < 8; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
 
-            // 移除起始点如果没有有效匹配
-            if (matches.size === 1) {
-                matches.clear();
-            }
+                        const animal = this.getRandomAnimal();
+                        this.board[row][col] = {
+                            animal: animal,
+                            element: cell,
+                            special: false
+                        };
 
-            return Array.from(matches);
-        }
+                        const animalSpan = document.createElement('span');
+                        animalSpan.className = 'animal';
+                        animalSpan.textContent = animal;
+                        cell.appendChild(animalSpan);
 
-        // 查找所有匹配
-        function findAllMatches() {
-            const allMatches = new Set();
-            
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    const matches = findMatches(row, col);
-                    matches.forEach(match => allMatches.add(match));
+                        boardElement.appendChild(cell);
+                    }
                 }
             }
-            
-            return Array.from(allMatches);
-        }
 
-        // 处理匹配
-        function processMatches() {
-            isAnimating = true;
-            const matches = findAllMatches();
-            
-            if (matches.length === 0) {
-                isAnimating = false;
-                checkGameOver();
-                return;
+            getRandomAnimal() {
+                const availableAnimals = this.animals.slice(0, Math.min(6 + Math.floor(this.level / 3), this.animals.length));
+                return availableAnimals[Math.floor(Math.random() * availableAnimals.length)];
             }
 
-            // 标记匹配的格子
-            matches.forEach(match => {
-                const [row, col] = match.split(',').map(Number);
-                const index = row * BOARD_SIZE + col;
-                const cell = document.querySelector(`[data-index="${index}"]`);
-                cell.classList.add('matched');
-            });
+            removeInitialMatches() {
+                let hasMatches = true;
+                while (hasMatches) {
+                    const matches = this.findMatches();
+                    if (matches.length === 0) {
+                        hasMatches = false;
+                    } else {
+                        matches.forEach(match => {
+                            const row = match.row;
+                            const col = match.col;
+                            this.board[row][col].animal = this.getRandomAnimal();
+                            this.board[row][col].element.querySelector('.animal').textContent = this.board[row][col].animal;
+                        });
+                    }
+                }
+            }
 
-            // 更新分数
-            score += matches.length * POINTS_PER_MATCH;
-            updateUI();
+            bindEvents() {
+                document.getElementById('gameBoard').addEventListener('click', (e) => {
+                    if (!this.gameActive || this.isPaused) return;
+                    
+                    const cell = e.target.closest('.cell');
+                    if (!cell) return;
 
-            setTimeout(() => {
-                // 清除匹配的格子
-                matches.forEach(match => {
-                    const [row, col] = match.split(',').map(Number);
-                    board[row][col] = null;
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+
+                    if (this.activePowerUp) {
+                        this.usePowerUp(row, col);
+                        return;
+                    }
+
+                    this.handleCellClick(row, col);
                 });
 
-                dropBlocks();
-                fillEmpty();
-                renderBoard();
+                // 道具按钮事件
+                document.getElementById('bombPowerUp').addEventListener('click', () => {
+                    if (this.powerUps.bomb > 0) {
+                        this.activePowerUp = 'bomb';
+                        this.highlightPowerUpMode();
+                    }
+                });
 
-                setTimeout(() => {
-                    isAnimating = false;
-                    // 检查连锁反应
-                    processMatches();
-                }, 500);
-            }, 600);
-        }
+                document.getElementById('rainbowPowerUp').addEventListener('click', () => {
+                    if (this.powerUps.rainbow > 0) {
+                        this.activePowerUp = 'rainbow';
+                        this.highlightPowerUpMode();
+                    }
+                });
 
-        // 方块下落
-        function dropBlocks() {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                const column = [];
-                
-                // 收集非空格子
-                for (let row = BOARD_SIZE - 1; row >= 0; row--) {
-                    if (board[row][col] !== null) {
-                        column.push(board[row][col]);
+                document.getElementById('shufflePowerUp').addEventListener('click', () => {
+                    if (this.powerUps.shuffle > 0) {
+                        this.shuffleBoard();
+                        this.powerUps.shuffle--;
+                        this.updatePowerUpDisplay();
+                    }
+                });
+            }
+
+            highlightPowerUpMode() {
+                document.getElementById('gameBoard').style.cursor = 'crosshair';
+                document.getElementById('gameBoard').style.border = '3px solid #ff6b6b';
+            }
+
+            resetPowerUpMode() {
+                document.getElementById('gameBoard').style.cursor = 'default';
+                document.getElementById('gameBoard').style.border = 'none';
+                this.activePowerUp = null;
+            }
+
+            usePowerUp(row, col) {
+                switch (this.activePowerUp) {
+                    case 'bomb':
+                        this.useBomb(row, col);
+                        this.powerUps.bomb--;
+                        break;
+                    case 'rainbow':
+                        this.useRainbow(row, col);
+                        this.powerUps.rainbow--;
+                        break;
+                }
+                this.updatePowerUpDisplay();
+                this.resetPowerUpMode();
+                this.moves--;
+                this.checkGameState();
+            }
+
+            useBomb(row, col) {
+                const cellsToDestroy = [];
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                            cellsToDestroy.push({ row: newRow, col: newCol });
+                        }
                     }
                 }
                 
-                // 重新填充列
-                for (let row = BOARD_SIZE - 1; row >= 0; row--) {
-                    if (column.length > 0) {
-                        board[row][col] = column.shift();
+                this.destroyCells(cellsToDestroy);
+                this.score += cellsToDestroy.length * 20;
+            }
+
+            useRainbow(row, col) {
+                const targetAnimal = this.board[row][col].animal;
+                const cellsToDestroy = [];
+                
+                for (let i = 0; i < 8; i++) {
+                    for (let j = 0; j < 8; j++) {
+                        if (this.board[i][j].animal === targetAnimal) {
+                            cellsToDestroy.push({ row: i, col: j });
+                        }
+                    }
+                }
+                
+                this.destroyCells(cellsToDestroy);
+                this.score += cellsToDestroy.length * 15;
+            }
+
+            shuffleBoard() {
+                const animals = [];
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        animals.push(this.board[row][col].animal);
+                    }
+                }
+
+                // Fisher-Yates 洗牌算法
+                for (let i = animals.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [animals[i], animals[j]] = [animals[j], animals[i]];
+                }
+
+                let index = 0;
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        this.board[row][col].animal = animals[index];
+                        this.board[row][col].element.querySelector('.animal').textContent = animals[index];
+                        index++;
+                    }
+                }
+
+                this.removeInitialMatches();
+            }
+
+            handleCellClick(row, col) {
+                if (!this.selectedCell) {
+                    this.selectCell(row, col);
+                } else {
+                    const selectedRow = this.selectedCell.row;
+                    const selectedCol = this.selectedCell.col;
+
+                    if (row === selectedRow && col === selectedCol) {
+                        this.deselectCell();
+                        return;
+                    }
+
+                    if (this.isAdjacent(selectedRow, selectedCol, row, col)) {
+                        this.swapCells(selectedRow, selectedCol, row, col);
+                        this.deselectCell();
                     } else {
-                        board[row][col] = null;
+                        this.deselectCell();
+                        this.selectCell(row, col);
                     }
                 }
             }
-        }
 
-        // 填充空格
-        function fillEmpty() {
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    if (board[row][col] === null) {
-                        board[row][col] = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+            selectCell(row, col) {
+                this.selectedCell = { row, col };
+                this.board[row][col].element.classList.add('selected');
+            }
+
+            deselectCell() {
+                if (this.selectedCell) {
+                    this.board[this.selectedCell.row][this.selectedCell.col].element.classList.remove('selected');
+                    this.selectedCell = null;
+                }
+            }
+
+            isAdjacent(row1, col1, row2, col2) {
+                const rowDiff = Math.abs(row1 - row2);
+                const colDiff = Math.abs(col1 - col2);
+                return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+            }
+
+            async swapCells(row1, col1, row2, col2) {
+                // 交换动物
+                const temp = this.board[row1][col1].animal;
+                this.board[row1][col1].animal = this.board[row2][col2].animal;
+                this.board[row2][col2].animal = temp;
+
+                // 更新显示
+                this.board[row1][col1].element.querySelector('.animal').textContent = this.board[row1][col1].animal;
+                this.board[row2][col2].element.querySelector('.animal').textContent = this.board[row2][col2].animal;
+
+                // 检查是否形成匹配
+                const matches = this.findMatches();
+                if (matches.length > 0) {
+                    this.moves--;
+                    await this.processMatches();
+                    this.checkGameState();
+                } else {
+                    // 没有匹配，撤销交换
+                    setTimeout(() => {
+                        const temp = this.board[row1][col1].animal;
+                        this.board[row1][col1].animal = this.board[row2][col2].animal;
+                        this.board[row2][col2].animal = temp;
+
+                        this.board[row1][col1].element.querySelector('.animal').textContent = this.board[row1][col1].animal;
+                        this.board[row2][col2].element.querySelector('.animal').textContent = this.board[row2][col2].animal;
+                    }, 300);
+                }
+
+                this.updateDisplay();
+            }
+
+            findMatches() {
+                const matches = [];
+                const visited = new Set();
+
+                // 检查水平匹配
+                for (let row = 0; row < 8; row++) {
+                    let count = 1;
+                    let currentAnimal = this.board[row][0].animal;
+                    
+                    for (let col = 1; col < 8; col++) {
+                        if (this.board[row][col].animal === currentAnimal) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                for (let i = col - count; i < col; i++) {
+                                    const key = `${row},${i}`;
+                                    if (!visited.has(key)) {
+                                        matches.push({ row, col: i });
+                                        visited.add(key);
+                                    }
+                                }
+                            }
+                            currentAnimal = this.board[row][col].animal;
+                            count = 1;
+                        }
+                    }
+                    
+                    if (count >= 3) {
+                        for (let i = 8 - count; i < 8; i++) {
+                            const key = `${row},${i}`;
+                            if (!visited.has(key)) {
+                                matches.push({ row, col: i });
+                                visited.add(key);
+                            }
+                        }
+                    }
+                }
+
+                // 检查垂直匹配
+                for (let col = 0; col < 8; col++) {
+                    let count = 1;
+                    let currentAnimal = this.board[0][col].animal;
+                    
+                    for (let row = 1; row < 8; row++) {
+                        if (this.board[row][col].animal === currentAnimal) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                for (let i = row - count; i < row; i++) {
+                                    const key = `${i},${col}`;
+                                    if (!visited.has(key)) {
+                                        matches.push({ row: i, col });
+                                        visited.add(key);
+                                    }
+                                }
+                            }
+                            currentAnimal = this.board[row][col].animal;
+                            count = 1;
+                        }
+                    }
+                    
+                    if (count >= 3) {
+                        for (let i = 8 - count; i < 8; i++) {
+                            const key = `${i},${col}`;
+                            if (!visited.has(key)) {
+                                matches.push({ row: i, col });
+                                visited.add(key);
+                            }
+                        }
+                    }
+                }
+
+                return matches;
+            }
+
+            async processMatches() {
+                let hasMatches = true;
+                this.combo = 0;
+
+                while (hasMatches) {
+                    const matches = this.findMatches();
+                    if (matches.length === 0) {
+                        hasMatches = false;
+                    } else {
+                        this.combo++;
+                        this.showCombo();
                         
-                        // 添加下落动画
-                        const index = row * BOARD_SIZE + col;
-                        const cell = document.querySelector(`[data-index="${index}"]`);
-                        cell.classList.add('falling');
+                        // 创建特殊方块
+                        this.createSpecialBlocks(matches);
+                        
+                        // 计算得分
+                        const baseScore = matches.length * 10;
+                        const comboScore = baseScore * this.combo;
+                        this.score += comboScore;
+
+                        // 高亮匹配的方块
+                        matches.forEach(match => {
+                            this.board[match.row][match.col].element.classList.add('matching');
+                        });
+
+                        await this.delay(500);
+
+                        // 移除匹配的方块
+                        this.destroyCells(matches);
+
+                        // 掉落新方块
+                        await this.dropNewBlocks();
+                        
+                        this.updateDisplay();
+                        await this.delay(300);
+                    }
+                }
+
+                if (this.combo > 1) {
+                    setTimeout(() => this.hideCombo(), 1500);
+                }
+            }
+
+            createSpecialBlocks(matches) {
+                if (matches.length >= 5) {
+                    // 创建彩虹球
+                    const firstMatch = matches[0];
+                    this.board[firstMatch.row][firstMatch.col].special = 'rainbow';
+                    this.board[firstMatch.row][firstMatch.col].element.classList.add('rainbow-block');
+                } else if (matches.length >= 4) {
+                    // 创建炸弹
+                    const firstMatch = matches[0];
+                    this.board[firstMatch.row][firstMatch.col].special = 'bomb';
+                    this.board[firstMatch.row][firstMatch.col].element.classList.add('bomb-block');
+                }
+            }
+
+            destroyCells(cells) {
+                cells.forEach(cell => {
+                    this.board[cell.row][cell.col].animal = null;
+                    this.board[cell.row][cell.col].element.classList.remove('matching', 'special-block', 'bomb-block', 'rainbow-block');
+                    this.board[cell.row][cell.col].element.querySelector('.animal').textContent = '';
+                    this.board[cell.row][cell.col].special = false;
+                });
+            }
+
+            async dropNewBlocks() {
+                // 让现有方块下落
+                for (let col = 0; col < 8; col++) {
+                    let writePos = 7;
+                    for (let readPos = 7; readPos >= 0; readPos--) {
+                        if (this.board[readPos][col].animal !== null) {
+                            if (writePos !== readPos) {
+                                this.board[writePos][col].animal = this.board[readPos][col].animal;
+                                this.board[writePos][col].element.querySelector('.animal').textContent = this.board[readPos][col].animal;
+                                this.board[writePos][col].element.classList.add('falling');
+                                
+                                this.board[readPos][col].animal = null;
+                                this.board[readPos][col].element.querySelector('.animal').textContent = '';
+                            }
+                            writePos--;
+                        }
+                    }
+
+                    // 填充新方块
+                    for (let row = writePos; row >= 0; row--) {
+                        this.board[row][col].animal = this.getRandomAnimal();
+                        this.board[row][col].element.querySelector('.animal').textContent = this.board[row][col].animal;
+                        this.board[row][col].element.classList.add('falling');
+                    }
+                }
+
+                await this.delay(500);
+                
+                // 移除下落动画
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        this.board[row][col].element.classList.remove('falling');
                     }
                 }
             }
-        }
 
-        // 更新UI
-        function updateUI() {
-            document.getElementById('score').textContent = score;
-            document.getElementById('moves').textContent = moves;
-            document.getElementById('target').textContent = target;
-            
-            const progress = Math.min(100, (score / target) * 100);
-            document.getElementById('progressFill').style.width = progress + '%';
-        }
+            showCombo() {
+                const comboIndicator = document.getElementById('comboIndicator');
+                const comboCount = document.getElementById('comboCount');
+                comboCount.textContent = this.combo;
+                comboIndicator.classList.add('show');
+            }
 
-        // 检查游戏结束
-        function checkGameOver() {
-            if (score >= target) {
-                showModal('🎉 恭喜获胜！', `太棒了！你达到了目标分数 ${target}！`, 'win-modal');
-            } else if (moves <= 0) {
-                showModal('😢 游戏结束', `很遗憾，步数用完了！你的得分是 ${score}`, 'lose-modal');
+            hideCombo() {
+                const comboIndicator = document.getElementById('comboIndicator');
+                comboIndicator.classList.remove('show');
+            }
+
+            checkGameState() {
+                this.updateDisplay();
+
+                if (this.score >= this.targetScore) {
+                    this.gameWin();
+                } else if (this.moves <= 0) {
+                    this.gameOver();
+                }
+            }
+
+            gameWin() {
+                this.gameActive = false;
+                document.getElementById('modalTitle').textContent = '🎉 恭喜过关！';
+                document.getElementById('modalText').innerHTML = `
+                    <p>第 ${this.level} 关完成！</p>
+                    <p>得分: ${this.score}</p>
+                    <p>剩余步数: ${this.moves}</p>
+                    <p>获得奖励道具！</p>
+                `;
+                document.getElementById('gameModal').style.display = 'block';
+
+                // 奖励道具
+                this.powerUps.bomb += 1;
+                this.powerUps.rainbow += 1;
+                if (this.level % 3 === 0) {
+                    this.powerUps.shuffle += 1;
+                }
+            }
+
+            gameOver() {
+                this.gameActive = false;
+                document.getElementById('modalTitle').textContent = '😢 游戏结束';
+                document.getElementById('modalText').innerHTML = `
+                    <p>步数用完了！</p>
+                    <p>最终得分: ${this.score}</p>
+                    <p>目标分数: ${this.targetScore}</p>
+                    <p>差一点就成功了，再试一次吧！</p>
+                `;
+                document.getElementById('gameModal').style.display = 'block';
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('moves').textContent = this.moves;
+                
+                const progress = Math.min((this.score / this.targetScore) * 100, 100);
+                document.getElementById('progressBar').style.width = progress + '%';
+
+                this.updatePowerUpDisplay();
+            }
+
+            updatePowerUpDisplay() {
+                document.getElementById('bombCount').textContent = this.powerUps.bomb;
+                document.getElementById('rainbowCount').textContent = this.powerUps.rainbow;
+                document.getElementById('shuffleCount').textContent = this.powerUps.shuffle;
+
+                document.getElementById('bombPowerUp').classList.toggle('disabled', this.powerUps.bomb <= 0);
+                document.getElementById('rainbowPowerUp').classList.toggle('disabled', this.powerUps.rainbow <= 0);
+                document.getElementById('shufflePowerUp').classList.toggle('disabled', this.powerUps.shuffle <= 0);
+            }
+
+            nextLevel() {
+                this.level++;
+                this.moves = Math.max(25, 30 - this.level); // 随着关卡增加，步数略微减少
+                this.targetScore = this.targetScore + (this.level * 500); // 目标分数递增
+                this.combo = 0;
+                this.gameActive = true;
+                this.updatePowerUpDisplay();
+                
+                document.getElementById('gameModal').style.display = 'none';
+                this.createBoard();
+                this.removeInitialMatches();
+                this.updateDisplay();
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
             }
         }
 
-        // 显示模态框
-        function showModal(title, message, className = '') {
-            const modal = document.getElementById('gameModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalContent = modal.querySelector('.modal-content');
-            
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalContent.className = 'modal-content ' + className;
-            modal.style.display = 'block';
+        let game;
+
+        function startGame() {
+            game = new AnimalMatch3Game();
         }
 
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('gameModal').style.display = 'none';
+        function pauseGame() {
+            if (game) {
+                game.isPaused = !game.isPaused;
+                const btn = event.target;
+                btn.textContent = game.isPaused ? '继续' : '暂停';
+            }
         }
 
-        // 新游戏
-        function newGame() {
-            initGame();
-        }
-
-        // 重置游戏
         function resetGame() {
-            if (confirm('确定要重置当前游戏吗？')) {
-                initGame();
+            if (game) {
+                game.score = 0;
+                game.level = 1;
+                game.moves = 30;
+                game.targetScore = 1000;
+                game.powerUps = { bomb: 3, rainbow: 2, shuffle: 2 };
+                game.gameActive = true;
+                game.isPaused = false;
+                game.createBoard();
+                game.removeInitialMatches();
+                game.updateDisplay();
+                document.getElementById('gameModal').style.display = 'none';
             }
         }
 
-        // 点击模态框外部关闭
-        window.onclick = function(event) {
-            const modal = document.getElementById('gameModal');
-            if (event.target === modal) {
-                closeModal();
+        function restartGame() {
+            document.getElementById('gameModal').style.display = 'none';
+            resetGame();
+        }
+
+        function nextLevel() {
+            if (game) {
+                game.nextLevel();
             }
         }
 
-        // 启动游戏
-        initGame();
+        // 页面加载完成后自动开始游戏
+        window.addEventListener('load', () => {
+            startGame();
+        });
     </script>
 </body>
 </html>
