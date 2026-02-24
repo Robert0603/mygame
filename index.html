@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>动物消消乐 - 羊了个羊风格</title>
+    <title>萌宠消消乐</title>
     <style>
         * {
             margin: 0;
@@ -12,423 +12,309 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px;
-            overflow-x: hidden;
         }
 
-        .game-header {
-            text-align: center;
-            color: white;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
             margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.9);
             padding: 15px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            width: 100%;
-            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .level-indicator {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #FFD700;
+        .score-info {
+            text-align: left;
         }
 
-        .game-stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .stat {
+        .level-info {
             text-align: center;
-            padding: 5px 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            min-width: 80px;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFD700;
         }
 
         .tools {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-
-        .tool-btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
-            min-width: 80px;
-        }
-
-        .tool-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .tool-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .tool-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ff4757;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .shuffle-btn { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; }
-        .hint-btn { background: linear-gradient(45deg, #4834d4, #686de0); color: white; }
-        .bomb-btn { background: linear-gradient(45deg, #ff9ff3, #f368e0); color: white; }
-
-        .game-container {
-            position: relative;
-            margin: 20px 0;
+            text-align: right;
         }
 
         .game-board {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 3px;
-            background: rgba(255, 255, 255, 0.1);
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .cell {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            background: rgba(255, 255, 255, 0.9);
-            user-select: none;
         }
 
         .cell:hover {
             transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .cell.selected {
-            border: 3px solid #FFD700;
-            box-shadow: 0 0 20px #FFD700;
-        }
-
-        .cell.matching {
-            animation: pulse 0.5s ease-in-out;
+            background: #ffd700;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
 
         .cell.special-bomb {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff6b6b);
-            background-size: 200% 200%;
-            animation: specialGlow 2s ease-in-out infinite;
-            border: 2px solid #FFD700;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            animation: pulse 1s infinite;
         }
 
-        .cell.row-bomb {
-            background: linear-gradient(90deg, #4834d4, #686de0, #4834d4);
-            background-size: 200% 200%;
-            animation: specialGlow 2s ease-in-out infinite;
+        .cell.line-bomb {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            animation: pulse 1s infinite;
         }
 
-        .cell.col-bomb {
-            background: linear-gradient(0deg, #20bf6b, #26d0ce, #20bf6b);
-            background-size: 200% 200%;
-            animation: specialGlow 2s ease-in-out infinite;
-        }
-
-        @keyframes specialGlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .cell.color-bomb {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            animation: rainbow 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
         }
 
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.5); }
-        }
-
-        @keyframes dropIn {
-            0% { transform: translateY(-50px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .cell.removing {
-            animation: fadeOut 0.5s ease-in-out forwards;
-        }
-
-        .cell.dropping {
-            animation: dropIn 0.5s ease-out;
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
         }
 
         .explosion {
             position: absolute;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .explosion-particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #ff6b6b;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff6b6b, #ffa500);
             border-radius: 50%;
-            animation: explode 0.8s ease-out forwards;
+            animation: explode 0.6s ease-out forwards;
+            pointer-events: none;
+            z-index: 100;
         }
 
         @keyframes explode {
             0% {
-                transform: scale(1);
+                transform: translate(-50%, -50%) scale(0);
                 opacity: 1;
             }
+            50% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0.8;
+            }
             100% {
-                transform: scale(3) translate(var(--dx, 0), var(--dy, 0));
+                transform: translate(-50%, -50%) scale(2);
                 opacity: 0;
             }
         }
 
-        .level-complete, .level-failed {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+        .tool-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .tool-btn:hover {
+            background: #45a049;
+        }
+
+        .tool-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
         .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
             padding: 30px;
-            border-radius: 20px;
+            border-radius: 15px;
             text-align: center;
-            max-width: 350px;
-            margin: 20px;
-            animation: modalPop 0.5s ease-out;
+            max-width: 300px;
+            width: 90%;
         }
 
-        @keyframes modalPop {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .modal h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .modal button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+        .btn {
+            background: #4CAF50;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 5px;
-            transition: transform 0.3s ease;
+            margin: 10px;
+            font-size: 16px;
         }
 
-        .modal button:hover {
-            transform: translateY(-2px);
+        .btn:hover {
+            background: #45a049;
         }
 
         .progress-bar {
             width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
             margin: 10px 0;
         }
 
-        .progress-fill {
+        .progress {
             height: 100%;
-            background: linear-gradient(45deg, #20bf6b, #26d0ce);
-            transition: width 0.5s ease;
-            border-radius: 10px;
+            background: #4CAF50;
+            border-radius: 5px;
+            transition: width 0.3s;
         }
 
-        @media (max-width: 500px) {
-            .cell {
-                width: 38px;
-                height: 38px;
-                font-size: 20px;
+        @media (max-width: 600px) {
+            .game-board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
             }
             
-            .game-board {
-                gap: 2px;
-                padding: 8px;
+            .cell {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
             }
-        }
-
-        .score-popup {
-            position: absolute;
-            color: #FFD700;
-            font-weight: bold;
-            font-size: 18px;
-            pointer-events: none;
-            animation: scoreFloat 1s ease-out forwards;
-            z-index: 1000;
-        }
-
-        @keyframes scoreFloat {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-50px) scale(1.5);
-                opacity: 0;
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-header">
-        <div class="level-indicator">第 <span id="currentLevel">1</span> 关</div>
-        <div class="game-stats">
-            <div class="stat">
-                <div>得分</div>
-                <div class="stat-value" id="score">0</div>
-            </div>
-            <div class="stat">
-                <div>目标</div>
-                <div class="stat-value" id="target">1000</div>
-            </div>
-            <div class="stat">
-                <div>移动</div>
-                <div class="stat-value" id="moves">30</div>
+    <div class="header">
+        <div class="score-info">
+            <div>得分: <span id="score">0</span></div>
+            <div>目标: <span id="target">1000</span></div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
             </div>
         </div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressBar"></div>
+        <div class="level-info">
+            <h2 id="levelTitle">第1关</h2>
+            <div>步数: <span id="moves">30</span></div>
+        </div>
+        <div class="tools">
+            <button class="tool-btn" id="shuffleBtn" onclick="useShuffle()">
+                🔄 重排(<span id="shuffleCount">1</span>)
+            </button>
+            <button class="tool-btn" id="bombBtn" onclick="useBomb()">
+                💣 炸弹(<span id="bombCount">1</span>)
+            </button>
         </div>
     </div>
 
-    <div class="tools">
-        <button class="tool-btn shuffle-btn" onclick="useTool('shuffle')">
-            重排 <span class="tool-count" id="shuffleCount">1</span>
-        </button>
-        <button class="tool-btn hint-btn" onclick="useTool('hint')">
-            提示 <span class="tool-count" id="hintCount">1</span>
-        </button>
-        <button class="tool-btn bomb-btn" onclick="useTool('bomb')">
-            炸弹 <span class="tool-count" id="bombCount">1</span>
-        </button>
-    </div>
+    <div class="game-board" id="gameBoard"></div>
 
-    <div class="game-container">
-        <div class="game-board" id="gameBoard"></div>
+    <!-- 游戏结束模态框 -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">游戏结束</h2>
+            <p id="modalMessage">恭喜通关！</p>
+            <button class="btn" onclick="nextLevel()">下一关</button>
+            <button class="btn" onclick="restartGame()">重新开始</button>
+        </div>
     </div>
 
     <script>
-        class AnimalMatch3 {
+        class CuteMatch3Game {
             constructor() {
-                this.BOARD_SIZE = 8;
-                this.ANIMALS = ['🐱', '🐶', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+                // 可爱的小动物表情
+                this.animals = ['🐱', '🐶', '🐰', '🐼', '🐸', '🦊'];
                 this.board = [];
                 this.selectedCell = null;
                 this.score = 0;
+                this.level = 1;
                 this.moves = 30;
                 this.target = 1000;
-                this.level = 1;
-                this.tools = {
-                    shuffle: 1,
-                    hint: 1,
-                    bomb: 1
-                };
+                this.shuffleCount = 1;
+                this.bombCount = 1;
                 this.isProcessing = false;
-                this.activeTool = null;
                 
-                this.init();
+                this.initGame();
+                this.updateUI();
             }
 
-            init() {
-                this.createBoard();
+            initGame() {
+                this.board = [];
+                const boardElement = document.getElementById('gameBoard');
+                boardElement.innerHTML = '';
+
+                // 初始化棋盘
+                for (let row = 0; row < 8; row++) {
+                    this.board[row] = [];
+                    for (let col = 0; col < 8; col++) {
+                        this.board[row][col] = this.getRandomAnimal();
+                    }
+                }
+
+                // 确保初始状态没有匹配
+                this.removeInitialMatches();
                 this.renderBoard();
                 this.updateUI();
             }
 
-            createBoard() {
-                this.board = [];
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    this.board[row] = [];
-                    for (let col = 0; col < this.BOARD_SIZE; col++) {
-                        if (this.level === 1) {
-                            // 第一关：简单模式，只用4种动物，更容易匹配
-                            this.board[row][col] = {
-                                animal: this.ANIMALS[Math.floor(Math.random() * 4)],
-                                special: null
-                            };
-                        } else {
-                            // 第二关：困难模式，使用更多动物类型，减少匹配机会
-                            this.board[row][col] = {
-                                animal: this.ANIMALS[Math.floor(Math.random() * (this.level === 2 ? 7 : 6))],
-                                special: null
-                            };
-                        }
-                    }
-                }
-                
-                // 确保初始状态没有现成的匹配
-                this.removeInitialMatches();
+            getRandomAnimal() {
+                return this.animals[Math.floor(Math.random() * this.animals.length)];
             }
 
             removeInitialMatches() {
                 let hasMatches = true;
                 while (hasMatches) {
                     hasMatches = false;
-                    for (let row = 0; row < this.BOARD_SIZE; row++) {
-                        for (let col = 0; col < this.BOARD_SIZE; col++) {
-                            if (this.checkMatchAt(row, col).length >= 3) {
-                                this.board[row][col].animal = this.getRandomAnimal();
+                    for (let row = 0; row < 8; row++) {
+                        for (let col = 0; col < 8; col++) {
+                            if (this.hasMatchAt(row, col)) {
+                                this.board[row][col] = this.getRandomAnimal();
                                 hasMatches = true;
                             }
                         }
@@ -436,67 +322,89 @@
                 }
             }
 
-            getRandomAnimal() {
-                if (this.level === 1) {
-                    return this.ANIMALS[Math.floor(Math.random() * 4)];
-                } else {
-                    return this.ANIMALS[Math.floor(Math.random() * 7)];
-                }
+            hasMatchAt(row, col) {
+                const animal = this.board[row][col];
+                
+                // 检查横向匹配
+                let horizontalCount = 1;
+                for (let c = col - 1; c >= 0 && this.board[row][c] === animal; c--) horizontalCount++;
+                for (let c = col + 1; c < 8 && this.board[row][c] === animal; c++) horizontalCount++;
+                
+                // 检查纵向匹配
+                let verticalCount = 1;
+                for (let r = row - 1; r >= 0 && this.board[r][col] === animal; r--) verticalCount++;
+                for (let r = row + 1; r < 8 && this.board[r][col] === animal; r++) verticalCount++;
+                
+                return horizontalCount >= 3 || verticalCount >= 3;
             }
 
             renderBoard() {
                 const boardElement = document.getElementById('gameBoard');
                 boardElement.innerHTML = '';
-                
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    for (let col = 0; col < this.BOARD_SIZE; col++) {
+
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
                         const cell = document.createElement('div');
                         cell.className = 'cell';
                         cell.dataset.row = row;
                         cell.dataset.col = col;
+                        cell.textContent = this.board[row][col];
+                        cell.onclick = () => this.handleCellClick(row, col);
                         
-                        const cellData = this.board[row][col];
-                        cell.textContent = cellData.animal;
-                        
-                        if (cellData.special) {
-                            cell.classList.add(cellData.special);
+                        // 检查是否是特殊炸弹
+                        if (this.board[row][col] === '💣') {
+                            cell.classList.add('special-bomb');
+                        } else if (this.board[row][col] === '⚡') {
+                            cell.classList.add('line-bomb');
+                        } else if (this.board[row][col] === '🌈') {
+                            cell.classList.add('color-bomb');
                         }
                         
-                        cell.addEventListener('click', () => this.handleCellClick(row, col));
                         boardElement.appendChild(cell);
                     }
                 }
             }
 
             handleCellClick(row, col) {
-                if (this.isProcessing) return;
-                
-                if (this.activeTool === 'bomb') {
-                    this.useBomb(row, col);
-                    this.activeTool = null;
-                    return;
-                }
+                if (this.isProcessing || this.moves <= 0) return;
 
-                const clickedCell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 
-                if (this.selectedCell === null) {
-                    this.selectedCell = { row, col };
-                    clickedCell.classList.add('selected');
-                } else {
-                    const prevSelected = document.querySelector('.selected');
-                    if (prevSelected) prevSelected.classList.remove('selected');
-                    
+                if (this.selectedCell) {
                     if (this.selectedCell.row === row && this.selectedCell.col === col) {
-                        this.selectedCell = null;
+                        // 取消选择
+                        this.clearSelection();
                         return;
                     }
                     
                     if (this.isAdjacent(this.selectedCell.row, this.selectedCell.col, row, col)) {
+                        // 交换方块
                         this.swapCells(this.selectedCell.row, this.selectedCell.col, row, col);
+                        this.clearSelection();
+                        this.moves--;
+                        this.processMatches();
+                        this.updateUI();
+                    } else {
+                        // 选择新的方块
+                        this.clearSelection();
+                        this.selectCell(row, col, cell);
                     }
-                    
-                    this.selectedCell = null;
+                } else {
+                    // 选择方块
+                    this.selectCell(row, col, cell);
                 }
+            }
+
+            selectCell(row, col, cell) {
+                this.selectedCell = { row, col };
+                cell.classList.add('selected');
+            }
+
+            clearSelection() {
+                document.querySelectorAll('.cell.selected').forEach(cell => {
+                    cell.classList.remove('selected');
+                });
+                this.selectedCell = null;
             }
 
             isAdjacent(row1, col1, row2, col2) {
@@ -505,461 +413,395 @@
                 return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
             }
 
-            async swapCells(row1, col1, row2, col2) {
-                // 交换
-                const temp = { ...this.board[row1][col1] };
-                this.board[row1][col1] = { ...this.board[row2][col2] };
+            swapCells(row1, col1, row2, col2) {
+                const temp = this.board[row1][col1];
+                this.board[row1][col1] = this.board[row2][col2];
                 this.board[row2][col2] = temp;
-                
                 this.renderBoard();
-                
-                const matches1 = this.checkMatchAt(row1, col1);
-                const matches2 = this.checkMatchAt(row2, col2);
-                
-                if (matches1.length >= 3 || matches2.length >= 3) {
-                    this.moves--;
-                    this.updateUI();
-                    await this.processMatches();
-                } else {
-                    // 没有匹配，交换回去
-                    const temp = { ...this.board[row1][col1] };
-                    this.board[row1][col1] = { ...this.board[row2][col2] };
-                    this.board[row2][col2] = temp;
-                    this.renderBoard();
-                }
-            }
-
-            checkMatchAt(row, col) {
-                const animal = this.board[row][col].animal;
-                const matches = [{ row, col }];
-                
-                // 检查水平匹配
-                let left = col - 1;
-                while (left >= 0 && this.board[row][left].animal === animal) {
-                    matches.push({ row, col: left });
-                    left--;
-                }
-                
-                let right = col + 1;
-                while (right < this.BOARD_SIZE && this.board[row][right].animal === animal) {
-                    matches.push({ row, col: right });
-                    right++;
-                }
-                
-                if (matches.length >= 3) return matches;
-                
-                // 检查垂直匹配
-                const verticalMatches = [{ row, col }];
-                let up = row - 1;
-                while (up >= 0 && this.board[up][col].animal === animal) {
-                    verticalMatches.push({ row: up, col });
-                    up--;
-                }
-                
-                let down = row + 1;
-                while (down < this.BOARD_SIZE && this.board[down][col].animal === animal) {
-                    verticalMatches.push({ row: down, col });
-                    down++;
-                }
-                
-                return verticalMatches.length >= 3 ? verticalMatches : [];
             }
 
             async processMatches() {
                 this.isProcessing = true;
-                let totalMatches = 0;
                 let hasMatches = true;
                 
                 while (hasMatches) {
                     hasMatches = false;
-                    const allMatches = [];
+                    const matches = this.findMatches();
                     
-                    // 收集所有匹配
-                    for (let row = 0; row < this.BOARD_SIZE; row++) {
-                        for (let col = 0; col < this.BOARD_SIZE; col++) {
-                            const matches = this.checkMatchAt(row, col);
-                            if (matches.length >= 3) {
-                                // 检查特殊消除类型
-                                const specialType = this.getSpecialType(matches);
-                                allMatches.push({ matches, special: specialType, originRow: row, originCol: col });
-                            }
-                        }
-                    }
-                    
-                    if (allMatches.length > 0) {
+                    if (matches.length > 0) {
                         hasMatches = true;
                         
-                        // 处理每组匹配
-                        for (const matchGroup of allMatches) {
-                            const { matches, special, originRow, originCol } = matchGroup;
-                            
-                            // 创建爆炸效果
-                            this.createExplosion(originRow, originCol);
-                            
-                            // 标记要移除的格子
-                            matches.forEach(({ row, col }) => {
-                                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                                if (cell) cell.classList.add('matching');
-                            });
-                            
-                            totalMatches += matches.length;
-                            
-                            // 创建特殊方块
-                            if (special && matches.length > 0) {
-                                const centerMatch = matches[Math.floor(matches.length / 2)];
-                                this.board[centerMatch.row][centerMatch.col].special = special;
-                            }
-                        }
+                        // 创建特殊炸弹
+                        this.createSpecialBombs(matches);
                         
-                        await this.delay(500);
+                        // 添加爆炸特效
+                        this.addExplosionEffects(matches);
                         
-                        // 移除匹配的方块
-                        for (const matchGroup of allMatches) {
-                            matchGroup.matches.forEach(({ row, col }) => {
-                                this.board[row][col] = null;
-                            });
-                        }
+                        // 等待爆炸动画
+                        await this.sleep(300);
                         
-                        await this.dropPieces();
-                        await this.fillBoard();
+                        // 消除匹配的方块
+                        this.removeMatches(matches);
+                        this.score += matches.length * 10;
+                        
+                        // 掉落新方块
+                        this.dropNewBlocks();
+                        this.renderBoard();
+                        
+                        // 等待掉落动画
+                        await this.sleep(300);
                     }
-                }
-                
-                if (totalMatches > 0) {
-                    const points = totalMatches * 10 * (this.level === 2 ? 2 : 1); // 第二关双倍分数
-                    this.score += points;
-                    this.showScorePopup(points);
-                    this.updateUI();
                 }
                 
                 this.isProcessing = false;
-                this.checkGameState();
+                this.checkGameEnd();
             }
 
-            getSpecialType(matches) {
-                if (matches.length >= 5) {
-                    return 'special-bomb'; // 彩色炸弹
-                } else if (matches.length === 4) {
-                    // 判断是横向还是纵向
-                    const isHorizontal = matches.every(m => m.row === matches[0].row);
-                    return isHorizontal ? 'row-bomb' : 'col-bomb';
-                }
-                return null;
-            }
-
-            createExplosion(row, col) {
-                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                if (!cell) return;
+            findMatches() {
+                const matches = new Set();
                 
-                const rect = cell.getBoundingClientRect();
-                const explosion = document.createElement('div');
-                explosion.className = 'explosion';
-                explosion.style.left = rect.left + rect.width / 2 + 'px';
-                explosion.style.top = rect.top + rect.height / 2 + 'px';
-                
-                // 创建爆炸粒子
-                for (let i = 0; i < 8; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'explosion-particle';
+                // 查找横向匹配
+                for (let row = 0; row < 8; row++) {
+                    let count = 1;
+                    let current = this.board[row][0];
                     
-                    const angle = (i / 8) * Math.PI * 2;
-                    const distance = 50 + Math.random() * 30;
-                    const dx = Math.cos(angle) * distance;
-                    const dy = Math.sin(angle) * distance;
-                    
-                    particle.style.setProperty('--dx', dx + 'px');
-                    particle.style.setProperty('--dy', dy + 'px');
-                    particle.style.background = `hsl(${Math.random() * 60 + 10}, 100%, 60%)`;
-                    
-                    explosion.appendChild(particle);
-                }
-                
-                document.body.appendChild(explosion);
-                
-                setTimeout(() => {
-                    explosion.remove();
-                }, 1000);
-            }
-
-            showScorePopup(points) {
-                const popup = document.createElement('div');
-                popup.className = 'score-popup';
-                popup.textContent = `+${points}`;
-                popup.style.left = Math.random() * 200 + 100 + 'px';
-                popup.style.top = Math.random() * 100 + 200 + 'px';
-                
-                document.body.appendChild(popup);
-                
-                setTimeout(() => {
-                    popup.remove();
-                }, 1000);
-            }
-
-            async dropPieces() {
-                for (let col = 0; col < this.BOARD_SIZE; col++) {
-                    let writePos = this.BOARD_SIZE - 1;
-                    
-                    for (let row = this.BOARD_SIZE - 1; row >= 0; row--) {
-                        if (this.board[row][col] !== null) {
-                            if (writePos !== row) {
-                                this.board[writePos][col] = this.board[row][col];
-                                this.board[row][col] = null;
-                            }
-                            writePos--;
-                        }
-                    }
-                }
-                
-                this.renderBoard();
-                await this.delay(300);
-            }
-
-            async fillBoard() {
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    for (let col = 0; col < this.BOARD_SIZE; col++) {
-                        if (this.board[row][col] === null) {
-                            this.board[row][col] = {
-                                animal: this.getRandomAnimal(),
-                                special: null
-                            };
-                        }
-                    }
-                }
-                
-                this.renderBoard();
-                
-                // 添加掉落动画
-                const newCells = document.querySelectorAll('.cell');
-                newCells.forEach(cell => cell.classList.add('dropping'));
-                
-                await this.delay(300);
-                
-                newCells.forEach(cell => cell.classList.remove('dropping'));
-            }
-
-            useTool(toolType) {
-                if (this.tools[toolType] <= 0 || this.isProcessing) return;
-                
-                switch (toolType) {
-                    case 'shuffle':
-                        this.shuffleBoard();
-                        this.tools[toolType]--;
-                        break;
-                    case 'hint':
-                        this.showHint();
-                        this.tools[toolType]--;
-                        break;
-                    case 'bomb':
-                        this.activeTool = 'bomb';
-                        break;
-                }
-                
-                this.updateUI();
-            }
-
-            shuffleBoard() {
-                const animals = [];
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    for (let col = 0; col < this.BOARD_SIZE; col++) {
-                        animals.push(this.board[row][col].animal);
-                    }
-                }
-                
-                // Fisher-Yates 洗牌算法
-                for (let i = animals.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [animals[i], animals[j]] = [animals[j], animals[i]];
-                }
-                
-                let index = 0;
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    for (let col = 0; col < this.BOARD_SIZE; col++) {
-                        this.board[row][col].animal = animals[index++];
-                        this.board[row][col].special = null;
-                    }
-                }
-                
-                this.renderBoard();
-            }
-
-            showHint() {
-                // 简单的提示：高亮一个可能的移动
-                for (let row = 0; row < this.BOARD_SIZE; row++) {
-                    for (let col = 0; col < this.BOARD_SIZE - 1; col++) {
-                        // 尝试水平交换
-                        const temp = { ...this.board[row][col] };
-                        this.board[row][col] = { ...this.board[row][col + 1] };
-                        this.board[row][col + 1] = temp;
-                        
-                        if (this.checkMatchAt(row, col).length >= 3 || 
-                            this.checkMatchAt(row, col + 1).length >= 3) {
-                            // 恢复并高亮
-                            const temp2 = { ...this.board[row][col] };
-                            this.board[row][col] = { ...this.board[row][col + 1] };
-                            this.board[row][col + 1] = temp2;
-                            
-                            const cell1 = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                            const cell2 = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
-                            
-                            cell1.style.backgroundColor = 'rgba(255, 215, 0, 0.5)';
-                            cell2.style.backgroundColor = 'rgba(255, 215, 0, 0.5)';
-                            
-                            setTimeout(() => {
-                                cell1.style.backgroundColor = '';
-                                cell2.style.backgroundColor = '';
-                            }, 2000);
-                            
-                            return;
+                    for (let col = 1; col < 8; col++) {
+                        if (this.board[row][col] === current && current !== null) {
+                            count++;
                         } else {
-                            // 恢复
-                            const temp2 = { ...this.board[row][col] };
-                            this.board[row][col] = { ...this.board[row][col + 1] };
-                            this.board[row][col + 1] = temp2;
+                            if (count >= 3 && current !== null) {
+                                for (let c = col - count; c < col; c++) {
+                                    matches.add(`${row},${c}`);
+                                }
+                            }
+                            count = 1;
+                            current = this.board[row][col];
+                        }
+                    }
+                    
+                    if (count >= 3 && current !== null) {
+                        for (let c = 8 - count; c < 8; c++) {
+                            matches.add(`${row},${c}`);
                         }
                     }
                 }
-            }
-
-            useBomb(row, col) {
-                if (this.tools.bomb <= 0) return;
                 
-                this.createExplosion(row, col);
-                
-                // 炸掉3x3区域
-                for (let r = Math.max(0, row - 1); r <= Math.min(this.BOARD_SIZE - 1, row + 1); r++) {
-                    for (let c = Math.max(0, col - 1); c <= Math.min(this.BOARD_SIZE - 1, col + 1); c++) {
-                        this.board[r][c] = null;
+                // 查找纵向匹配
+                for (let col = 0; col < 8; col++) {
+                    let count = 1;
+                    let current = this.board[0][col];
+                    
+                    for (let row = 1; row < 8; row++) {
+                        if (this.board[row][col] === current && current !== null) {
+                            count++;
+                        } else {
+                            if (count >= 3 && current !== null) {
+                                for (let r = row - count; r < row; r++) {
+                                    matches.add(`${r},${col}`);
+                                }
+                            }
+                            count = 1;
+                            current = this.board[row][col];
+                        }
+                    }
+                    
+                    if (count >= 3 && current !== null) {
+                        for (let r = 8 - count; r < 8; r++) {
+                            matches.add(`${r},${col}`);
+                        }
                     }
                 }
                 
-                this.tools.bomb--;
-                this.score += 50;
-                
-                setTimeout(async () => {
-                    await this.dropPieces();
-                    await this.fillBoard();
-                    await this.processMatches();
-                }, 500);
-                
-                this.updateUI();
+                return Array.from(matches).map(pos => {
+                    const [row, col] = pos.split(',').map(Number);
+                    return { row, col };
+                });
             }
 
-            updateUI() {
-                document.getElementById('score').textContent = this.score;
-                document.getElementById('moves').textContent = this.moves;
-                document.getElementById('target').textContent = this.target;
-                document.getElementById('currentLevel').textContent = this.level;
+            createSpecialBombs(matches) {
+                // 分析匹配模式创建特殊炸弹
+                const matchGroups = this.groupMatches(matches);
                 
-                // 更新进度条
-                const progress = Math.min(100, (this.score / this.target) * 100);
-                document.getElementById('progressBar').style.width = progress + '%';
-                
-                // 更新道具计数
-                document.getElementById('shuffleCount').textContent = this.tools.shuffle;
-                document.getElementById('hintCount').textContent = this.tools.hint;
-                document.getElementById('bombCount').textContent = this.tools.bomb;
-                
-                // 禁用没有的道具
-                Object.keys(this.tools).forEach(tool => {
-                    const btn = document.querySelector(`.${tool}-btn`);
-                    if (this.tools[tool] <= 0) {
-                        btn.classList.add('disabled');
-                    } else {
-                        btn.classList.remove('disabled');
+                matchGroups.forEach(group => {
+                    if (group.length >= 5) {
+                        // 五连消：彩虹炸弹
+                        const centerPos = group[Math.floor(group.length / 2)];
+                        this.board[centerPos.row][centerPos.col] = '🌈';
+                    } else if (group.length === 4) {
+                        // 四连消：直线炸弹
+                        const centerPos = group[Math.floor(group.length / 2)];
+                        this.board[centerPos.row][centerPos.col] = '⚡';
+                    } else if (this.isLShape(group)) {
+                        // L形或T形：十字炸弹
+                        const centerPos = this.findLShapeCenter(group);
+                        this.board[centerPos.row][centerPos.col] = '💣';
                     }
                 });
             }
 
-            checkGameState() {
-                if (this.score >= this.target) {
-                    this.levelComplete();
-                } else if (this.moves <= 0) {
-                    this.gameOver();
+            groupMatches(matches) {
+                // 将匹配按连续性分组
+                const visited = new Set();
+                const groups = [];
+                
+                matches.forEach(match => {
+                    const key = `${match.row},${match.col}`;
+                    if (!visited.has(key)) {
+                        const group = [];
+                        this.dfsGroup(match, matches, visited, group);
+                        if (group.length >= 3) {
+                            groups.push(group);
+                        }
+                    }
+                });
+                
+                return groups;
+            }
+
+            dfsGroup(current, allMatches, visited, group) {
+                const key = `${current.row},${current.col}`;
+                if (visited.has(key)) return;
+                
+                visited.add(key);
+                group.push(current);
+                
+                // 查找相邻的匹配
+                allMatches.forEach(match => {
+                    if (!visited.has(`${match.row},${match.col}`) && 
+                        this.isAdjacent(current.row, current.col, match.row, match.col)) {
+                        this.dfsGroup(match, allMatches, visited, group);
+                    }
+                });
+            }
+
+            isLShape(group) {
+                if (group.length < 5) return false;
+                // 简化的L形检测
+                return group.length >= 5;
+            }
+
+            findLShapeCenter(group) {
+                // 返回组中心位置
+                return group[Math.floor(group.length / 2)];
+            }
+
+            addExplosionEffects(matches) {
+                matches.forEach(match => {
+                    const cell = document.querySelector(`[data-row="${match.row}"][data-col="${match.col}"]`);
+                    if (cell) {
+                        const explosion = document.createElement('div');
+                        explosion.className = 'explosion';
+                        cell.appendChild(explosion);
+                        
+                        setTimeout(() => {
+                            if (explosion.parentNode) {
+                                explosion.parentNode.removeChild(explosion);
+                            }
+                        }, 600);
+                    }
+                });
+            }
+
+            removeMatches(matches) {
+                matches.forEach(match => {
+                    this.board[match.row][match.col] = null;
+                });
+            }
+
+            dropNewBlocks() {
+                // 从底部往上处理每一列
+                for (let col = 0; col < 8; col++) {
+                    // 收集非空方块
+                    const nonEmptyBlocks = [];
+                    for (let row = 7; row >= 0; row--) {
+                        if (this.board[row][col] !== null) {
+                            nonEmptyBlocks.push(this.board[row][col]);
+                        }
+                    }
+                    
+                    // 填充列
+                    for (let row = 7; row >= 0; row--) {
+                        if (row >= 8 - nonEmptyBlocks.length) {
+                            this.board[row][col] = nonEmptyBlocks[7 - row];
+                        } else {
+                            this.board[row][col] = this.getRandomAnimal();
+                        }
+                    }
                 }
             }
 
-            levelComplete() {
-                const modal = document.createElement('div');
-                modal.className = 'level-complete';
-                modal.innerHTML = `
-                    <div class="modal">
-                        <h2>🎉 恭喜过关！</h2>
-                        <p>得分：${this.score}</p>
-                        <p>剩余移动：${this.moves}</p>
-                        ${this.level === 1 ? 
-                            '<button onclick="game.nextLevel()">进入第二关</button>' :
-                            '<button onclick="game.restart()">重新开始</button>'
-                        }
-                        <button onclick="game.restart()">返回第一关</button>
-                    </div>
-                `;
-                document.body.appendChild(modal);
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
             }
 
-            gameOver() {
-                const modal = document.createElement('div');
-                modal.className = 'level-failed';
-                modal.innerHTML = `
-                    <div class="modal">
-                        <h2>😢 挑战失败</h2>
-                        <p>得分：${this.score}</p>
-                        <p>目标：${this.target}</p>
-                        <button onclick="game.restart()">重新开始</button>
-                        ${this.level === 2 ? '<button onclick="game.backToLevel1()">返回第一关</button>' : ''}
-                    </div>
-                `;
-                document.body.appendChild(modal);
+            useShuffle() {
+                if (this.shuffleCount <= 0 || this.isProcessing) return;
+                
+                this.shuffleCount--;
+                
+                // 重新排列棋盘
+                for (let i = 0; i < 100; i++) {
+                    const row1 = Math.floor(Math.random() * 8);
+                    const col1 = Math.floor(Math.random() * 8);
+                    const row2 = Math.floor(Math.random() * 8);
+                    const col2 = Math.floor(Math.random() * 8);
+                    
+                    const temp = this.board[row1][col1];
+                    this.board[row1][col1] = this.board[row2][col2];
+                    this.board[row2][col2] = temp;
+                }
+                
+                this.renderBoard();
+                this.updateUI();
+            }
+
+            useBomb() {
+                if (this.bombCount <= 0 || this.isProcessing) return;
+                
+                this.bombCount--;
+                
+                // 随机炸掉3x3区域
+                const centerRow = Math.floor(Math.random() * 6) + 1;
+                const centerCol = Math.floor(Math.random() * 6) + 1;
+                
+                const bombMatches = [];
+                for (let r = centerRow - 1; r <= centerRow + 1; r++) {
+                    for (let c = centerCol - 1; c <= centerCol + 1; c++) {
+                        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                            bombMatches.push({ row: r, col: c });
+                        }
+                    }
+                }
+                
+                this.addExplosionEffects(bombMatches);
+                setTimeout(() => {
+                    this.removeMatches(bombMatches);
+                    this.score += bombMatches.length * 10;
+                    this.dropNewBlocks();
+                    this.renderBoard();
+                    this.processMatches();
+                    this.updateUI();
+                }, 300);
+            }
+
+            checkGameEnd() {
+                const progress = (this.score / this.target) * 100;
+                document.getElementById('progress').style.width = Math.min(progress, 100) + '%';
+                
+                if (this.score >= this.target) {
+                    // 通关
+                    this.showModal('恭喜通关！', `第${this.level}关完成！得分：${this.score}`, true);
+                } else if (this.moves <= 0) {
+                    // 游戏失败
+                    this.showModal('游戏失败', `步数用完了，再试一次吧！`, false);
+                }
+            }
+
+            showModal(title, message, isWin) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalMessage').textContent = message;
+                
+                const modal = document.getElementById('gameModal');
+                const nextBtn = modal.querySelector('button');
+                
+                if (isWin && this.level < 2) {
+                    nextBtn.style.display = 'inline-block';
+                    nextBtn.textContent = '下一关';
+                } else if (isWin && this.level >= 2) {
+                    nextBtn.style.display = 'inline-block';
+                    nextBtn.textContent = '重新挑战';
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                    nextBtn.textContent = '重新开始';
+                }
+                
+                modal.style.display = 'block';
             }
 
             nextLevel() {
-                this.level = 2;
-                this.target = 3000; // 第二关目标更高
-                this.moves = 25; // 移动次数更少
-                this.score = 0;
-                // 重置道具
-                this.tools = { shuffle: 1, hint: 1, bomb: 1 };
+                if (this.level === 1) {
+                    this.level = 2;
+                    this.target = 5000; // 第二关目标更高
+                    this.moves = 25;    // 步数更少
+                    this.shuffleCount = 0; // 第二关无道具
+                    this.bombCount = 0;
+                } else {
+                    // 重新挑战第二关
+                    this.level = 2;
+                    this.target = 5000;
+                    this.moves = 25;
+                    this.shuffleCount = 0;
+                    this.bombCount = 0;
+                }
                 
-                document.querySelector('.level-complete')?.remove();
-                this.createBoard();
-                this.renderBoard();
-                this.updateUI();
+                this.score = 0;
+                this.initGame();
+                document.getElementById('gameModal').style.display = 'none';
             }
 
-            backToLevel1() {
+            restartGame() {
                 this.level = 1;
-                this.restart();
-            }
-
-            restart() {
-                this.level = this.level || 1;
                 this.score = 0;
-                this.moves = this.level === 1 ? 30 : 25;
-                this.target = this.level === 1 ? 1000 : 3000;
-                this.tools = { shuffle: 1, hint: 1, bomb: 1 };
-                this.selectedCell = null;
-                this.isProcessing = false;
-                this.activeTool = null;
-                
-                document.querySelector('.level-complete')?.remove();
-                document.querySelector('.level-failed')?.remove();
-                
-                this.createBoard();
-                this.renderBoard();
-                this.updateUI();
+                this.moves = 30;
+                this.target = 1000;
+                this.shuffleCount = 1;
+                this.bombCount = 1;
+                this.initGame();
+                document.getElementById('gameModal').style.display = 'none';
             }
 
-            delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
+            updateUI() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('target').textContent = this.target;
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('levelTitle').textContent = `第${this.level}关`;
+                document.getElementById('shuffleCount').textContent = this.shuffleCount;
+                document.getElementById('bombCount').textContent = this.bombCount;
+                
+                // 更新进度条
+                const progress = (this.score / this.target) * 100;
+                document.getElementById('progress').style.width = Math.min(progress, 100) + '%';
+                
+                // 更新道具按钮状态
+                document.getElementById('shuffleBtn').disabled = this.shuffleCount <= 0;
+                document.getElementById('bombBtn').disabled = this.bombCount <= 0;
             }
         }
 
         // 全局函数
-        function useTool(toolType) {
-            game.useTool(toolType);
+        let game;
+
+        function initGame() {
+            game = new CuteMatch3Game();
         }
 
-        // 初始化游戏
-        const game = new AnimalMatch3();
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function restartGame() {
+            game.restartGame();
+        }
+
+        function useShuffle() {
+            game.useShuffle();
+        }
+
+        function useBomb() {
+            game.useBomb();
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('gameModal').onclick = function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        }
+
+        // 游戏初始化
+        window.onload = function() {
+            initGame();
+        }
     </script>
 </body>
 </html>
